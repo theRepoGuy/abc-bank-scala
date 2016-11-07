@@ -1,5 +1,7 @@
 package com.abc
 
+import org.joda.time.{DateTime, Days}
+
 import scala.collection.mutable.ListBuffer
 
 object Account {
@@ -8,35 +10,60 @@ object Account {
   final val MAXI_SAVINGS: Int = 2
 }
 
-class Account(val accountType: Int, var transactions: ListBuffer[Transaction] = ListBuffer()) {
+class Account(val accountType: Int, val transactions: ListBuffer[Transaction] = ListBuffer()) {
 
   def deposit(amount: Double) {
     if (amount <= 0)
       throw new IllegalArgumentException("amount must be greater than zero")
-    else
-      transactions += Transaction(amount)
+    else{
+      val now = DateTime.now
+      transactions += Transaction(amount, now)
+    }
   }
 
   def withdraw(amount: Double) {
     if (amount <= 0)
       throw new IllegalArgumentException("amount must be greater than zero")
-    else
-      transactions += Transaction(-amount)
+    else{
+      val now = DateTime.now
+      transactions += Transaction(-amount, now)
+    }
+  }
+
+  private def computeDailyInterest(principle: Double, rate: Double): Double = {
+    (accountAge * principle * rate) / 365
   }
 
   def interestEarned: Double = {
     val amount: Double = sumTransactions()
     accountType match {
       case Account.SAVINGS =>
-        if (amount <= 1000) amount * 0.001
-        else 1 + (amount - 1000) * 0.002
+        if (amount <= 1000) computeDailyInterest(amount, 0.001)
+        else computeDailyInterest(1 + (amount - 1000), 0.002)
       case Account.MAXI_SAVINGS =>
-        if (amount <= 1000) return amount * 0.02
-        if (amount <= 2000) return 20 + (amount - 1000) * 0.05
-        70 + (amount - 2000) * 0.1
+        computeDailyInterest(amount, (if (checkLastTenWithdraws) 0.05 else 0.001))
       case _ =>
-        amount * 0.001
+        computeDailyInterest(amount, 0.001)
     }
+  }
+
+  def checkLastTenWithdraws : Boolean = {
+
+    val now = DateTime.now
+    transactions.foldLeft(true){ (state, transaction) =>
+        if (Days.daysBetween(now, transaction.date).getDays < 10 && transaction.amount > 0.0)
+          state && true
+        else
+          state && false
+      }
+
+  }
+
+  def accountAge: Int = {
+    val now = DateTime.now
+    val diff = Days.daysBetween(now, transactions.head.date).getDays
+    if(diff > 0) diff
+    else 1
   }
 
   def sumTransactions(checkAllTransactions: Boolean = true): Double = transactions.map(_.amount).sum
