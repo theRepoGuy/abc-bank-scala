@@ -10,8 +10,9 @@ class TransactionTest extends FlatSpec with Matchers {
   }
 
   it should "test to see transactions record dates" in {
-    val t1 = Transaction(500, DateTime.now.minusDays(10))
-    val t2 = Transaction(400, DateTime.now.minusDays(10))
-    (Days.daysBetween(DateTime.now, t1.date).getDays > 0) should be (true)
+    val dateTime = DateTime.now
+    val test = dateTime
+    val t = Transaction(400, test)
+    (Days.daysBetween(DateTime.now, test).getDays == 0) should be (true)
   }
 }

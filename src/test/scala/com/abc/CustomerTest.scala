@@ -39,12 +39,12 @@ class CustomerTest extends FlatSpec with Matchers {
     val bob: Customer = new Customer("Bob").openAccount(bobSavings)
     val bobChking: Account = new Account(Account.CHECKING)
     bob.openAccount(bobChking)
-    bobSavings.deposit(2500)
+    bobSavings.deposit(3500)
     bobChking.deposit(500)
-    bobSavings.sumTransactions() should be(2500.0)
+    bobSavings.sumTransactions() should be(3500.0)
     bobChking.sumTransactions() should be(500.0)
-    bob.transferBtwnAccounts(bobSavings, bobChking, 250.0)
-    bobSavings.sumTransactions() should be(2250.0)
-    bobChking.sumTransactions() should be(750.0)
+    bob.transferBtwnAccounts(bobSavings, bobChking, 500.0)
+    bobSavings.sumTransactions() should be(3000.0)
+    bobChking.sumTransactions() should be(1000.0)
   }
 }
